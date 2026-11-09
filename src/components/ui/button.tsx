@@ -3,19 +3,15 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
-import React from "react";
 
 const buttonVariants = cva(
   [
-    "relative overflow-hidden group/button inline-flex shrink-0 items-center justify-center rounded-4xl border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all duration-700 outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 motion-reduce:transition-none",
-    //ripple effect
-    "after:pointer-events-none after:absolute after:left-[var(--button-ripple-x,50%)] after:top-[100%] after:aspect-square after:w-[200%] after:-translate-x-1/2 after:rounded-full after:ease-in-out after:bg-(--ripple) hover:after:-top-[200%] after:transition-all after:duration-700",
+    "relative group/button inline-flex shrink-0 items-center justify-center rounded-4xl border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 motion-reduce:transition-none",
   ],
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground hover:bg-primary/80 [--ripple:var(--background)] hover:text-foreground",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30",
         secondary:
@@ -45,33 +41,18 @@ const buttonVariants = cva(
   },
 );
 
-function setRippleOrigin(e: React.PointerEvent<HTMLElement>) {
-  const element = e.currentTarget;
-  const rect = element.getBoundingClientRect();
-
-  element.style.setProperty("--button-ripple-x", `${e.clientX - rect.left}px`);
-}
-
 function Button({
   className,
   variant = "default",
   size = "default",
-  onPointerEnter,
-  children,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      onPointerEnter={(e) => {
-        setRippleOrigin(e);
-        onPointerEnter?.(e);
-      }}
       {...props}
-    >
-      <span className="relative z-10">{children}</span>
-    </ButtonPrimitive>
+    />
   );
 }
 
