@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { cn } from "cn";
-
+import { type } from "arktype";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -18,17 +19,91 @@ import {
 import Link from "next/link";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { GenerateUsernameButton } from "./generate-username-button";
+import { createAccountSchema } from "@/validations/auth/create-account";
 
 export function CreateAccountForm({
   className,
+  onSubmit,
   ...props
 }: React.ComponentProps<"form">) {
-  const [username, setUsername] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    const result = createAccountSchema(data);
+
+    if (result instanceof type.errors) {
+      const fieldErrors: Record<string, string> = {};
+      for (const error of result) {
+        const fieldName = error.path.join(".") || "form";
+        fieldErrors[fieldName] = error.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    console.log("Valid data:", result);
+  };
+
+  const handleFormChanges = (e: React.FormEvent<HTMLFormElement>) => {
+    if (Object.keys(errors).length === 0) return;
+    const input = e.target as HTMLInputElement;
+    const fieldName = input.name;
+    if (!fieldName) return;
+
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    const result = createAccountSchema(data);
+
+    setErrors((prevErrors) => {
+      if (!(result instanceof type.errors)) {
+        return {};
+      }
+
+      const targetHasError = result.some(
+        (error) => error.path.join(".") === fieldName,
+      );
+
+      if (fieldName === "password" || fieldName === "confirmPassword") {
+        const confirmPasswordError = result.some(
+          (err) => err.path.join(".") === "confirmPassword",
+        );
+
+        const nextErrors = { ...prevErrors };
+        if (!targetHasError) delete nextErrors[fieldName];
+        if (!confirmPasswordError) delete nextErrors["confirmPassword"];
+
+        return nextErrors;
+      }
+
+      if (!targetHasError && prevErrors[fieldName]) {
+        const nextErrors = { ...prevErrors };
+        delete nextErrors[fieldName];
+        return nextErrors;
+      }
+
+      return prevErrors;
+    });
+  };
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      onSubmit={(e) => {
+        handleSubmit(e);
+        onSubmit?.(e);
+      }}
+      onChange={handleFormChanges}
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="font-heading text-2xl font-bold">
@@ -39,7 +114,7 @@ export function CreateAccountForm({
           </p>
         </div>
 
-        <Field>
+        <Field data-invalid={!!errors.anonymousUsername}>
           <FieldLabel htmlFor="anonymous-username">
             Anonymous Username
           </FieldLabel>
@@ -53,20 +128,23 @@ export function CreateAccountForm({
               name="anonymousUsername"
               placeholder="Enter your anonymous username"
               autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              data-invalid={!!errors.anonymousUsername}
               required
             />
             <InputGroupAddon align="inline-end" className="pr-0">
               <GenerateUsernameButton />
             </InputGroupAddon>
           </InputGroup>
-          <FieldDescription>
-            No username in mind? Tap the sparkle to generate one.
-          </FieldDescription>
+          {errors.anonymousUsername ? (
+            <FieldError>{errors.anonymousUsername}</FieldError>
+          ) : (
+            <FieldDescription>
+              No username in mind? Tap the sparkle to generate one.
+            </FieldDescription>
+          )}
         </Field>
 
-        <Field>
+        <Field data-invalid={!!errors.password}>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <InputGroup>
             <InputGroupAddon>
@@ -78,6 +156,7 @@ export function CreateAccountForm({
               name="password"
               placeholder="Create a password"
               autoComplete="new-password"
+              data-invalid={!!errors.password}
               required
             />
             <InputGroupAddon align="inline-end">
@@ -94,9 +173,10 @@ export function CreateAccountForm({
               </Button>
             </InputGroupAddon>
           </InputGroup>
+          <FieldError>{errors.password}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!errors.confirmPassword}>
           <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
           <InputGroup>
             <InputGroupAddon>
@@ -108,6 +188,7 @@ export function CreateAccountForm({
               name="confirmPassword"
               placeholder="Confirm your password"
               autoComplete="new-password"
+              data-invalid={!!errors.confirmPassword}
               required
             />
             <InputGroupAddon align="inline-end">
@@ -128,6 +209,7 @@ export function CreateAccountForm({
               </Button>
             </InputGroupAddon>
           </InputGroup>
+          <FieldError>{errors.confirmPassword}</FieldError>
         </Field>
 
         <Field>
