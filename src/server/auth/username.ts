@@ -1,5 +1,4 @@
 // @/server/auth/username.ts
-"use server";
 import "server-only";
 import { randomInt } from "node:crypto";
 import { db } from "@/db";

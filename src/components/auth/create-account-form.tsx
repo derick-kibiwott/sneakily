@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { cn } from "cn";
 import { type } from "arktype";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { GenerateUsernameButton } from "./generate-username-button";
 import { createAccountSchema } from "@/validations/auth/create-account";
+import { generateUsername } from "@/server/auth/username";
 
 export function CreateAccountForm({
   className,
@@ -29,6 +30,8 @@ export function CreateAccountForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isGenerating, startGenerating] = useTransition();
+  const [isSigningUp, startSignUp] = useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -91,6 +94,12 @@ export function CreateAccountForm({
       }
 
       return prevErrors;
+    });
+  };
+
+  const handleGenerate = () => {
+    startGenerate(async () => {
+      const result = await generateUsername();
     });
   };
 
