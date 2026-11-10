@@ -1,10 +1,14 @@
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main>
-        <h1 className="text-xl sm:text-4xl text-bold">
+        <h1 className="font-heading text-xl sm:text-4xl text-bold">
           Best website to find sneaky links
         </h1>
+        <p>Search anything here...</p>
+        <Button size={"lg"}>Click Me</Button>
       </main>
     </div>
   );

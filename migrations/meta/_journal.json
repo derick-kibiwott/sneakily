@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794154328863,
+      "tag": "0000_stormy_katie_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794241058852,
+      "tag": "0001_white_psylocke",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794256168030,
+      "tag": "0002_careful_satana",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794316569400,
+      "tag": "0003_panoramic_gwen_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794316627183,
+      "tag": "0004_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794327730880,
+      "tag": "0005_app-user-change",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794334358038,
+      "tag": "0006_fat_malice",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794334438909,
+      "tag": "0007_cute_senator_kelly",
+      "breakpoints": true
+    }
+  ]
+}

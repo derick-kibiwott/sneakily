@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Raleway } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+import localFont from "next/font/local";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
+import NextTopLoader from "nextjs-toploader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const ralewayHeading = Raleway({
   subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const regola = localFont({
+  src: "../fonts/regola.woff2",
+  weight: "300 900",
+  variable: "--font-sans",
 });
 
 const geistMono = Geist_Mono({
@@ -21,9 +32,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistMono.variable,
+        "font-sans",
+        regola.variable,
+        ralewayHeading.variable,
+      )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextTopLoader showSpinner={false} color="var(--primary)" />
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
