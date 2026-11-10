@@ -20,7 +20,6 @@ import Link from "next/link";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { GenerateUsernameButton } from "./generate-username-button";
 import { createAccountSchema } from "@/validations/auth/create-account";
-import { generateUsername } from "@/server/auth/username";
 
 export function CreateAccountForm({
   className,
@@ -30,8 +29,8 @@ export function CreateAccountForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isGenerating, startGenerating] = useTransition();
-  const [isSigningUp, startSignUp] = useTransition();
+  // const [isGenerating, startGenerate] = useTransition();
+  // const [isSigningUp, startSignUp] = useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,12 +93,6 @@ export function CreateAccountForm({
       }
 
       return prevErrors;
-    });
-  };
-
-  const handleGenerate = () => {
-    startGenerate(async () => {
-      const result = await generateUsername();
     });
   };
 
@@ -176,6 +169,7 @@ export function CreateAccountForm({
                 className="size-7"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff /> : <Eye />}
@@ -213,6 +207,11 @@ export function CreateAccountForm({
                     : "Show confirm password"
                 }
                 aria-pressed={showConfirmPassword}
+                title={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
               >
                 {showConfirmPassword ? <EyeOff /> : <Eye />}
               </Button>

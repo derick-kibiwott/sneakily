@@ -15,6 +15,13 @@
       "when": 1794241058852,
       "tag": "0001_white_psylocke",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794256168030,
+      "tag": "0002_careful_satana",
+      "breakpoints": true
     }
   ]
 }
