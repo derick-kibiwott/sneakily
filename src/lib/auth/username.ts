@@ -1,4 +1,4 @@
-// @/server/auth/username.ts
+// @/lib/auth/username.ts
 import "server-only";
 import { randomInt } from "node:crypto";
 import { db } from "@/db";
@@ -110,7 +110,7 @@ export function generateUsername() {
  * where someone claims it first.
  */
 
-export async function generateUniqueUsername() {
+export async function generateUniqueUsername(): Promise<string | null> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const usernames = Array.from({ length: 5 }, generateUsername);
 
@@ -127,3 +127,7 @@ export async function generateUniqueUsername() {
   }
   return null;
 }
+
+export type GenerateUsernameResult =
+  | { ok: true; username: string }
+  | { ok: false; error: string };

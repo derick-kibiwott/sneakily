@@ -10,8 +10,9 @@ import React from "react";
 
 export function GenerateUsernameButton({
   className,
+  isPending,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { isPending: boolean }) {
   return (
     <div className={cn("group inline-flex relative", className)} {...props}>
       <span
@@ -32,7 +33,12 @@ export function GenerateUsernameButton({
             />
           }
         >
-          <GeminiLogo className="size-6 transition-transform duration-700 ease-out group-hover:rotate-180 group-hover:scale-110 motion-reduce:transition-none" />
+          <GeminiLogo
+            className={cn(
+              "size-6 transition-transform duration-700 ease-out group-hover:rotate-180 group-hover:scale-110 motion-reduce:transition-none",
+              isPending && "animate-pulse",
+            )}
+          />
         </TooltipTrigger>
         <TooltipContent side="bottom">
           Generate Anonymous Username

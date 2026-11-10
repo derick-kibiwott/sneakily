@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "cn";
 import Link from "next/link";
-import { Eye, EyeOff, Lock, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -16,15 +16,27 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { PasswordField } from "./password-field";
+import { useActionForm } from "@/hooks/use-action-form";
+import { loginSchema } from "@/validations/auth";
+import { loginAction } from "@/actions/auth/login";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const [showPassword, setShowPassword] = useState(false);
+  const { errors, isPending, formProps } = useActionForm(
+    loginSchema,
+    loginAction,
+  );
+  
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+      {...formProps}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="font-heading text-2xl font-bold">
@@ -35,7 +47,11 @@ export function LoginForm({
           </p>
         </div>
 
-        <Field>
+        <FieldError className="border p-2 bg-card rounded-md">
+          {errors.form}
+        </FieldError>
+
+        <Field data-invalid={!!errors.anonymousUsername}>
           <FieldLabel htmlFor="anonymous-username">
             Anonymous Username
           </FieldLabel>
@@ -49,54 +65,33 @@ export function LoginForm({
               name="anonymousUsername"
               placeholder="Enter your anonymous username"
               autoComplete="username"
+              data-invalid={!!errors.anonymousUsername}
               required
             />
           </InputGroup>
+          <FieldError>{errors.anonymousUsername}</FieldError>
         </Field>
 
-        <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+        <PasswordField
+          id="password"
+          name="password"
+          label="Password"
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          error={errors.password}
+          labelAction={
             <Link
-              href="/auth/forgot-password"
+              href={"/auth/forgot-password"}
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
             </Link>
-          </div>
-
-          <InputGroup>
-            <InputGroupAddon>
-              <Lock />
-            </InputGroupAddon>
-            <InputGroupInput
-              id="password"
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              required
-            />
-
-            <InputGroupAddon align="inline-end">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-7"
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </Button>
-            </InputGroupAddon>
-          </InputGroup>
-        </Field>
+          }
+        />
 
         <Field>
-          <Button size="lg" type="submit">
-            Login
+          <Button size="lg" type="submit" disabled={isPending}>
+            {isPending ? "Logging in..." : "Login"}
           </Button>
         </Field>
 

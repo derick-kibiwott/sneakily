@@ -1,3 +1,7 @@
+import { LogoutButton } from "@/components/auth/logout-button";
+
 export default function Dashboard() {
-  return <div>dashboard</div>;
+  return <div>
+    <LogoutButton />
+  </div>;
 }
