@@ -46,6 +46,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-5xl: calc(var(--radius) * 3);
   --animate-shimmer: shimmer 2s infinite;
 }
 
@@ -73,7 +74,7 @@
   --chart-3: oklch(0.511 0.262 276.966);
   --chart-4: oklch(0.457 0.24 277.023);
   --chart-5: oklch(0.398 0.195 277.366);
-  --radius: 0.5rem;
+  --radius: 0.65rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
@@ -91,7 +92,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(55.553% 0.21506 29.368);;
+  --primary: oklch(55.553% 0.21506 29.368);
   --primary-foreground: oklch(97.913% 0.00011 271.152);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
@@ -129,12 +130,12 @@
     @apply font-sans;
   }
 
-@keyframes shimmer {
-  from {
-    transform: translateX(-100%);
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
     }
-  to {
-    transform: translateX(200%);
+    to {
+      transform: translateX(200%);
     }
   }
 }

@@ -3,13 +3,20 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "@teispace/next-themes";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
   ArrowRight,
   Compass,
   Home,
+  LayoutDashboard,
   MessageCircle,
+  Monitor,
+  Moon,
+  Palette,
   Search,
+  Sun,
+  User,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -17,6 +24,18 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   InputGroup,
   InputGroupAddon,
@@ -29,17 +48,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AppLogo } from "@/components/app-logo";
+import { SwitcherButton } from "@/components/ui/switcher-button";
 
 /* -------------------------------------------------------------------------- */
 /*  Types & helpers                                                           */
+/*  Optional props carry `| undefined` so they work with                      */
+/*  exactOptionalPropertyTypes.                                               */
 /* -------------------------------------------------------------------------- */
 
 type NavEntry = {
   href: string;
   label: string;
-  icon?: LucideIcon;
-  badge?: number;
-  avatar?: boolean;
+  icon?: LucideIcon | undefined;
+  badge?: number | undefined;
+  avatar?: boolean | undefined;
+};
+
+type AvatarProps = {
+  avatarSrc?: string | undefined;
+  avatarFallback: string;
 };
 
 const SEARCH_HINTS = [
@@ -60,15 +87,15 @@ function CountBadge({
   count,
   className,
 }: {
-  count?: number;
-  className?: string;
+  count?: number | undefined;
+  className?: string | undefined;
 }) {
   if (!count) return null;
   return (
     <span
       aria-hidden
       className={cn(
-        "flex items-center justify-center size-6 rounded-full bg-primary px-1.5 text-[10px] font-semibold leading-none text-primary-foreground",
+        "grid h-5 min-w-5 place-items-center rounded-4xl bg-emerald-400 px-1.5 text-[11px] font-semibold leading-none text-neutral-950",
         className,
       )}
     >
@@ -82,9 +109,9 @@ function ProfileAvatar({
   fallback,
   className,
 }: {
-  src?: string;
+  src?: string | undefined;
   fallback: string;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <Avatar className={className}>
@@ -95,33 +122,166 @@ function ProfileAvatar({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Desktop pill nav (lg and up) with the sliding hover highlight             */
-/*  Links use buttonVariants (real <a> tags), not <Button>, so Base UI        */
-/*  doesn't add role="button" to them.                                        */
+/*  Desktop pill nav (lg and up)                                              */
+/*  The pill uses the foreground color so it contrasts with the app           */
+/*  background; links use `background` as their text color.                   */
 /* -------------------------------------------------------------------------- */
+
+/** Overrides on top of the ghost Button: the sliding pill replaces the hover bg. */
+const desktopTone = (active: boolean) =>
+  cn(
+    "isolate gap-2 px-4 focus-visible:border-transparent focus-visible:ring-background/40",
+    active
+      ? "bg-background text-foreground hover:bg-background hover:text-foreground aria-expanded:bg-background aria-expanded:text-foreground dark:hover:bg-background"
+      : "text-background hover:bg-transparent hover:text-background aria-expanded:bg-transparent aria-expanded:text-background dark:hover:bg-transparent",
+  );
+
+/** The one highlight that glides between links (shared via layoutId). */
+function HoverPill({ show }: { show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.span
+          layoutId="nav-hover-pill"
+          aria-hidden
+          className="absolute inset-0 -z-10 rounded-4xl bg-background/15"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ type: "spring", bounce: 0.15, duration: 0.45 }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+function ProfileMenu({
+  item,
+  active,
+  hovered,
+  avatarSrc,
+  avatarFallback,
+  onHover,
+  onBlurTrigger,
+  onOpenChange,
+}: AvatarProps & {
+  item: NavEntry;
+  active: boolean;
+  hovered: boolean;
+  onHover: () => void;
+  onBlurTrigger: () => void;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <DropdownMenu onOpenChange={onOpenChange}>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="lg"
+            aria-label="Profile menu"
+            onMouseEnter={onHover}
+            onFocus={onHover}
+            onBlur={onBlurTrigger}
+            className={cn(desktopTone(active), "px-2.5")}
+          />
+        }
+      >
+        <HoverPill show={hovered && !active} />
+        <ProfileAvatar
+          src={avatarSrc}
+          fallback={avatarFallback}
+          className="size-7"
+        />
+        <span className="sr-only">{item.label}</span>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" sideOffset={14} className="w-48">
+        <DropdownMenuItem render={<Link href="/dashboard" />}>
+          <LayoutDashboard />
+          Dashboard
+        </DropdownMenuItem>
+        <DropdownMenuItem render={<Link href="/account" />}>
+          <User />
+          Account
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Palette />
+            Theme
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              value={theme ?? "system"}
+              onValueChange={(value) => setTheme(String(value))}
+            >
+              <DropdownMenuRadioItem value="light">
+                <Sun />
+                Light
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">
+                <Moon />
+                Dark
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">
+                <Monitor />
+                System
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function DesktopNav({
   items,
   pathname,
   avatarSrc,
   avatarFallback,
-}: {
+}: AvatarProps & {
   items: NavEntry[];
   pathname: string;
-  avatarSrc?: string;
-  avatarFallback: string;
 }) {
   const [hovered, setHovered] = React.useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
     <nav aria-label="Main" className="hidden lg:block">
       <ul
-        onMouseLeave={() => setHovered(null)}
-        className="flex items-center gap-1 rounded-full bg-foreground text-background backdrop-blur-md p-1.5"
+        onMouseLeave={() => !menuOpen && setHovered(null)}
+        className="flex items-center gap-1 rounded-4xl bg-foreground p-1.5"
       >
         {items.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
+
+          if (item.avatar) {
+            return (
+              <li key={item.href}>
+                <ProfileMenu
+                  item={item}
+                  active={active}
+                  hovered={hovered === item.href}
+                  avatarSrc={avatarSrc}
+                  avatarFallback={avatarFallback}
+                  onHover={() => setHovered(item.href)}
+                  onBlurTrigger={() => !menuOpen && setHovered(null)}
+                  onOpenChange={(open) => {
+                    setMenuOpen(open);
+                    setHovered(open ? item.href : null);
+                  }}
+                />
+              </li>
+            );
+          }
+
           return (
             <li key={item.href}>
               <Link
@@ -132,52 +292,16 @@ function DesktopNav({
                 onBlur={() => setHovered(null)}
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "lg" }),
-                  "isolate gap-2 px-4 focus-visible:border-transparent focus-visible:ring-primary-foreground/40",
-                  // The sliding pill replaces the button's own hover background
-                  active
-                    ? "bg-background text-foreground hover:bg-background"
-                    : "text-primary-foreground hover:bg-transparent hover:text-primary-foreground",
-                  item.avatar && "px-2.5",
+                  desktopTone(active),
                 )}
               >
-                {/* One shared highlight: it glides between whichever link is hovered */}
-                <AnimatePresence>
-                  {hovered === item.href && !active && (
-                    <motion.span
-                      layoutId="nav-hover-pill"
-                      aria-hidden
-                      className="absolute inset-0 -z-10 rounded-full bg-primary-foreground/15"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        type: "spring",
-                        bounce: 0.15,
-                        duration: 0.45,
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-
-                {item.avatar ? (
-                  <>
-                    <ProfileAvatar
-                      src={avatarSrc}
-                      fallback={avatarFallback}
-                      className="size-7"
-                    />
-                    <span className="sr-only">{item.label}</span>
-                  </>
-                ) : (
-                  <>
-                    {Icon && <Icon aria-hidden />}
-                    <span>{item.label}</span>
-                    <CountBadge count={item.badge} />
-                    {item.badge ? (
-                      <span className="sr-only">{item.badge} unread</span>
-                    ) : null}
-                  </>
-                )}
+                <HoverPill show={hovered === item.href && !active} />
+                {Icon && <Icon aria-hidden />}
+                <span>{item.label}</span>
+                <CountBadge count={item.badge} />
+                {item.badge ? (
+                  <span className="sr-only">{item.badge} unread</span>
+                ) : null}
               </Link>
             </li>
           );
@@ -188,7 +312,8 @@ function DesktopNav({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Bottom tab bar (below lg): icons only, labelled for screen readers        */
+/*  Bottom tab bar (below lg): icons only, labelled for screen readers.       */
+/*  Profile is a plain link to /profile here; no dropdown.                    */
 /* -------------------------------------------------------------------------- */
 
 function MobileNav({
@@ -196,11 +321,9 @@ function MobileNav({
   pathname,
   avatarSrc,
   avatarFallback,
-}: {
+}: AvatarProps & {
   items: NavEntry[];
   pathname: string;
-  avatarSrc?: string;
-  avatarFallback: string;
 }) {
   return (
     <nav
@@ -265,30 +388,6 @@ function MobileNav({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Login: default Button style; the arrow slides right to left on hover.     */
-/*  buttonVariants already declares `group/button`, so we use that group.     */
-/* -------------------------------------------------------------------------- */
-
-function LoginButton({ className }: { className?: string }) {
-  return (
-    <Link
-      href="/auth/login"
-      className={cn(buttonVariants({ size: "lg" }), "pl-5 pr-12 ", className)}
-    >
-      <span className="transition-transform duration-300 ease-out group-hover/button:translate-x-7 group-focus-visible/button:translate-x-7 motion-reduce:transition-none">
-        Login
-      </span>
-      <span
-        aria-hidden
-        className="absolute left-[calc(100%-2.375rem)] top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full bg-primary-foreground text-primary transition-[left] duration-300 ease-out group-hover/button:left-1.5 group-focus-visible/button:left-1.5 motion-reduce:transition-none"
-      >
-        <ArrowRight className="size-3.5" />
-      </span>
-    </Link>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
 /*  Search: tooltip -> expands into an input group with rotating hints        */
 /* -------------------------------------------------------------------------- */
 
@@ -345,7 +444,7 @@ function SearchBox({
       {open ? (
         <form role="search" onSubmit={onSubmit}>
           <InputGroup
-            className="h-10 animate-in rounded-full bg-background fade-in duration-200"
+            className="h-10 animate-in rounded-4xl bg-background fade-in duration-200"
             onKeyDown={(e) => e.key === "Escape" && close(true)}
             onBlur={(e) => {
               if (!e.currentTarget.contains(e.relatedTarget) && !value)
@@ -406,6 +505,7 @@ function SearchBox({
                 type="button"
                 variant="outline"
                 size="icon-lg"
+                className={"dark:bg-background border"}
                 aria-label="Search"
                 aria-expanded={false}
                 onClick={() => onOpenChange(true)}
@@ -426,13 +526,13 @@ function SearchBox({
 /* -------------------------------------------------------------------------- */
 
 export function Navbar({
-  chatCount = 4,
+  chatCount = 0,
   avatarSrc,
   avatarFallback = "U",
 }: {
-  chatCount?: number;
-  avatarSrc?: string;
-  avatarFallback?: string;
+  chatCount?: number | undefined;
+  avatarSrc?: string | undefined;
+  avatarFallback?: string | undefined;
 }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -446,12 +546,17 @@ export function Navbar({
 
   return (
     <MotionConfig reducedMotion="user">
-      <header className="sticky top-0 z-40">
+      <header
+        className={cn(
+          "sticky top-0 z-40",
+          pathname == "/explore" && "relative",
+        )}
+      >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 lg:px-6">
           <Button
             size={"icon-lg"}
-            render={<Link href="/" aria-label="Go to home page" />}
             nativeButton={false}
+            render={<Link href="/" aria-label="sneakily, go to home page" />}
           >
             <AppLogo className="size-6" />
           </Button>
@@ -467,7 +572,14 @@ export function Navbar({
 
           <div className="flex items-center gap-2">
             <SearchBox open={searchOpen} onOpenChange={setSearchOpen} />
-            <LoginButton className={cn(searchOpen && "max-sm:hidden")} />
+            <SwitcherButton
+              icon={ArrowRight}
+              className={cn(searchOpen && "max-sm:hidden")}
+              size={"lg"}
+              render={<Link href={"/auth/login"} />}
+            >
+              Login
+            </SwitcherButton>
           </div>
         </div>
       </header>

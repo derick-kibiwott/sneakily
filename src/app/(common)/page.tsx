@@ -1,15 +1,26 @@
-import { Button } from "@/components/ui/button";
+import {
+  AREAS,
+  getPopularCreators,
+  getTopRatedCreators,
+  SERVICES,
+} from "@/lib/creators";
+import { Hero } from "@/components/home/hero";
+import { PopularCreators } from "@/components/home/popular-creators";
+import { TopRated } from "@/components/home/top-rated";
+import { AreaBento } from "@/components/home/area-bento";
+import { ServiceCategories } from "@/components/home/services-category";
 
-export default function Home() {
+export default function HomePage() {
+  const popular = getPopularCreators(4);
+  const topRated = getTopRatedCreators(5);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main>
-        <h1 className="font-heading text-xl sm:text-4xl text-bold">
-          Best website to find sneaky links
-        </h1>
-        <p>Search anything here...</p>
-        <Button size={"lg"}>Click Me</Button>
-      </main>
-    </div>
+    <>
+      <Hero creators={popular} />
+      <PopularCreators creators={popular} />
+      <TopRated creators={topRated} />
+      <AreaBento areas={AREAS} />
+      <ServiceCategories services={SERVICES} />
+    </>
   );
 }
